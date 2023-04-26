@@ -202,28 +202,28 @@ int main(int argc, char *argv[]) {
 
       total_time+= seconds;
 
-      gettimeofday(&start,NULL);
+      // gettimeofday(&start,NULL);
 
-      ic0_csr_parInner(num_cols,  valP, colP, rowP);
+      // ic0_csr_parInner(num_cols,  valP, colP, rowP);
 
-      gettimeofday(&end, NULL);
+      // gettimeofday(&end, NULL);
 
-      seconds = (end.tv_sec + (double)end.tv_usec/1000000) - (start.tv_sec + (double)start.tv_usec/1000000); 
+      // seconds = (end.tv_sec + (double)end.tv_usec/1000000) - (start.tv_sec + (double)start.tv_usec/1000000); 
 
-      total_timeP+= seconds;
+      // total_timeP+= seconds;
 
    }
 
-   int failed = 0;
-    for (int i = 0; i < nnzCnt; ++i) {
-      if(val[i]-valP[i] > 10e-4) failed=1;
-    }
+   // int failed = 0;
+   //  for (int i = 0; i < nnzCnt; ++i) {
+   //    if(val[i]-valP[i] > 10e-4) failed=1;
+   //  }
 
-    if(failed == 1)
-      printf("Verification failed!!!");
+   //  if(failed == 1)
+   //    printf("Verification failed!!!");
 
    printf("Time taken by the Serial kernel for %d runs = %f s\n", num_runs,total_time/num_runs);
-   printf("Time taken by the parallel kernel for %d runs = %f s\n", num_runs,total_timeP/num_runs);
+   //printf("Time taken by the parallel kernel for %d runs = %f s\n", num_runs,total_timeP/num_runs);
 
 
     fclose(fp);

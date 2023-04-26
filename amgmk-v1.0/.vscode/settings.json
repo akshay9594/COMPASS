@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "headers.h": "c",
-        "seq_mv.h": "c",
-        "omp.h": "c",
-        "stdlib.h": "c",
-        "assert.h": "c"
-    }
-}

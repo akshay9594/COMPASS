@@ -43,9 +43,8 @@
 #include "npbparams.h"
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef _OPENMP
 #include <omp.h>
-#endif
+
 
 
 /*****************************************************************/
