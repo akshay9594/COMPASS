@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
     int num_rows, num_cols, nonzeros, colCnt=0, nnzCnt=0;
 
     size_t len = 0;
-    ssize_t read;
+    size_t read;
     char matrix_details[100];
 
     fp = fopen(file_path, "r");
@@ -146,9 +146,9 @@ int main(int argc, char *argv[]) {
    col = malloc(sizeof(int)*nonzeros);
    val = malloc(sizeof(double)*nonzeros);
 
-   rowP = malloc(sizeof(int)*nonzeros);
-   colP = malloc(sizeof(int)*nonzeros);
-   valP = malloc(sizeof(double)*nonzeros);
+   // rowP = malloc(sizeof(int)*nonzeros);
+   // colP = malloc(sizeof(int)*nonzeros);
+   // valP = malloc(sizeof(double)*nonzeros);
 
    col[0]=0;
    int x,y,col_num=0;
