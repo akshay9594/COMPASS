@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
             r = row_val[i];
         }
     }
-    row[holder+1] = nonzeros-1;
+    //row[holder+1] = nonzeros-1;
 
     double* W =  (double*)malloc(sizeof(double)*num_rows*s_factor);
     double* H =  (double*)malloc(sizeof(double)*num_cols*s_factor);

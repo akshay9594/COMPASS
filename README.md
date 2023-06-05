@@ -1,8 +1,8 @@
 
-# The COMbined Parallel Subscripted Subscript (COMPASS) Benchmark Suite 
+# The Comprehensive Parallel Subscripted Subscript (COMPASS) Benchmark Suite 
 This COMPASS suite is a collection of benchmarks exhibiting special patterns
 referred to as subscripted subscript patterns such as a[b[i]]. The benchmarks
-have been taken from several well-known benchmark suite listed below.
+have been taken from several well-known benchmark suites listed below.
 
 # Obtaining the Codes
 
