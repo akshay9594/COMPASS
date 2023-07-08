@@ -11,10 +11,10 @@ This repository contains the benchmark codes listed below:
 | Code  | Source | Original Source link | 
 | ------------- | ------------- | ------------- |
 | Amgmk-v1.0  | CORAL Benchmark Codes | (https://asc.llnl.gov/coral-benchmarks)
-| UA-NPB-1.0.3 | NAS Parallel Benchmarks | (https://github.com/akshay9595/SNU_NPB-1.0.3)  
+| UA-NPB-1.0.3 | NAS Parallel Benchmarks | (https://github.com/akshay9594/SNU_NPB-1.0.3)  
 | CHOLMOD | SuiteSparse | (https://github.com/DrTimothyAldenDavis/SuiteSparse)
 | IncompleteCholesky (C version) | Sparselib++ | (https://github.com/king-mahdi/IEGenLib)
-| IS-NPB-1.0.3 | NAS Parallel Benchmarks | (https://github.com/akshay9595/SNU_NPB-1.0.3)
+| IS-NPB-1.0.3 | NAS Parallel Benchmarks | (https://github.com/akshay9594/SNU_NPB-1.0.3)
 | SDDMM (C version) | Published Paper | (https://github.com/isratnisa/SDDMM_GPU)
 
 The benchmarks can be obtained by cloning the git repository using the commands-

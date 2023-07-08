@@ -1,32 +1,30 @@
-
+/* 
+ Subscripted subscript example from the Algebraic Multigrid kernel (Amgmk)
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <omp.h>
+//#include <omp.h>
 #include <sys/time.h>
 #include <math.h>
 #include <assert.h>
 #include "util.h"
 
-void sddmm_CPU_CSR(int * row_ptr, int *col_ind, double * val_ind, double* W,
-                     double* H, double* p_ind,int n_rows ,int k);
+#define N 30000
 
-void Par_sddmm_CPU_CSR(int * row_ptr, int *col_ind, double * val, double* W,
-                     double* H, double* p,int n_rows ,int k);
+void sddmm_CPU_CSR(int* row_ptr, int* col_ind, double* nnz_val, double* W,
+                     double* H, double* p,int n_rows ,int k, int nonzeros);
+
+// void Par_sddmm_CPU_CSR(int* par_row_ptr, int* col_ind, double* nnz_val, double* W,
+//                      double* H, double* p,int n_rows ,int k, int nonzeros);
 
 int* row_val; 
 int* col_val; 
 double* nnz_val;
 
 int* row;
-int* col;
-double* val;
-double* val_par;
-
-// int* rowP;
-// int* colP;
-// double* valP;
+//int* rowP;
 
 int convertStrtoArr(char* str)
 {
@@ -55,7 +53,10 @@ int convertStrtoArr(char* str)
             // subtract str[i] by 48 to convert it to int
             // Generate number by multiplying 10 and adding
             // (int)(str[i])
+   
+          if(str[i] - 48 >= 0)
             arr = arr * 10 + (str[i] - 48);
+              
         }
     }
    
@@ -64,26 +65,98 @@ int convertStrtoArr(char* str)
   
 }
 
-int main(int argc, char *argv[]) {
+void sddmm_CPU_CSR(int* row_ptr, int* col_ind, double* nnz_val, double* W,
+                     double* H, double* p,int n_rows ,int k, int nonzeros){
+       // reduction(+:rmse)
+    int i,r, ind,t,holder;
+    double sm;
 
+     holder=1;
+     row_ptr[0]=0;
+     r = row_val[0];
+      for(i=0; i < nonzeros; i++){
+        if(row_val[i] != r){
+            row_ptr[holder++] = i;
+           // rowP[holder] = i;
+            r = row_val[i];
+        }
+    }
 
-  if(argc < 2){
+    row_ptr[holder] = nonzeros;
+
+    //#pragma omp parallel for private(sm,r,ind,t)
+    for (r = 0; r < n_rows; ++r){
+        for (ind = row_ptr[r]; ind < row_ptr[r+1]; ++ind){
+            sm=0;
+            for (t = 0; t < k; ++t){
+                sm += W[r * k + t] * H[col_ind[ind] * k + t];
+               
+            }
+            p[ind] = sm * nnz_val[ind];     //Scaling of non-zero elements of the sparse matrix
+           
+        }                
+    } 
+}
+
+void Par_sddmm_CPU_CSR(int* par_row_ptr, int* col_ind, double* nnz_val, double* W,
+                     double* H, double* p,int n_rows ,int k, int nonzeros){
+       // reduction(+:rmse)
+    int i,r, ind,t,holder;
+    double sm;
+
+     holder = 1;
+    par_row_ptr[0]=0;
+     r = row_val[0];
+      for(i =0; i < nonzeros; i++){
+        if(row_val[i] != r){
+            par_row_ptr[holder++] = i;
+           // rowP[holder] = i;
+            r = row_val[i];
+        }
+    }
+    
+    par_row_ptr[holder] = nonzeros;
+
+    #pragma omp parallel for private(sm,r,ind,t)
+    for (r = 0; r < n_rows; ++r){
+        for (ind = par_row_ptr[r]; ind < par_row_ptr[r+1]; ++ind){
+            sm=0;
+            for (t = 0; t < k; ++t){
+                sm += W[r * k + t] * H[col_ind[ind] * k + t];
+               
+            }
+            p[ind] = sm * nnz_val[ind];     //Scaling of non-zero elements of the sparse matrix
+           
+        }                
+    } 
+}
+
+int main(int argc, char *argv[]){
+
+     if(argc < 2){
    printf("Input missing arguments, you need to specify input list file\n");
   }
 
-   char* file_path = argv[1];
+ char* file_path = argv[1];
   //std::string inputMatrix;
-  int i,j,k;
-  int s_factor = 3200;
-
+  int i,j,k, s_factor,holder,count;
+  int num_rows, num_cols, nonzeros,num_runs,failed;
+  size_t len,read;
   struct timeval start,end;//,startTT, endTT;
+  FILE * fp;
+  char *line = NULL;
+  char *ptr;
+  char* rowstr = NULL;
+  char* temp_str;
+  double seconds, total_time,total_timeP;
+  double* W;
+  double* H;
+  double* P;
+  double* ParallelP;
 
-    FILE * fp;
-    char * line = NULL;
-    int num_rows, num_cols, nonzeros, colCnt=0, nnzCnt=0;
-
-    size_t len = 0;
-    size_t read;
+    s_factor = 3200;
+    count = 0;
+    num_runs = 5;
 
     fp = fopen(file_path, "r");
     if (fp == NULL)
@@ -100,11 +173,8 @@ int main(int argc, char *argv[]) {
 
    char delim[] = " ";
 
-	char *ptr = strtok(line, delim);
-   char* rowstr = NULL;
+   ptr = strtok(line, delim);
    rowstr = (char *)malloc(sizeof(line)); 
-   int count = 0;
-   char* temp_str;
 
    while(ptr != NULL)
 	{
@@ -122,9 +192,9 @@ int main(int argc, char *argv[]) {
 		ptr = strtok(NULL, delim);
 	}
 
-   row_val = (int*)malloc(sizeof(int)*(nonzeros));
-   col_val = (int*)malloc(sizeof(int)*nonzeros);
-   nnz_val = (double*)malloc(sizeof(double)*nonzeros);
+   row_val = (int*)malloc(sizeof(int)*(nonzeros+1));
+   col_val = (int*)malloc(sizeof(int)*(nonzeros+1));
+   nnz_val = (double*)malloc(sizeof(double)*(nonzeros+1));
 
 
    i=0;
@@ -148,70 +218,39 @@ int main(int argc, char *argv[]) {
        i++; 
    }
 
-   row = malloc(sizeof(int)*nonzeros);
-   col = malloc(sizeof(int)*nonzeros);
-   val = malloc(sizeof(double)*nonzeros);
+   row = malloc(sizeof(int)*(nonzeros+1));
+   //rowP = malloc(sizeof(int)*(nonzeros+1));
 
-//    rowP = malloc(sizeof(int)*nonzeros);
+  
+    total_time=0.0;
+    total_timeP=0.0;
 
-
-   int num_runs = 1;
-   double seconds, total_time=0.0,total_timeP=0.0;
-
-    int idx=0, tot=0;
-    row[0]=0;
-    //rowP[0]=0;
-    int holder=0;
-    int r = row_val[idx];
-
-    for(i =0; i < nonzeros; i++){
-        if(row_val[i] != r){
-            holder++;
-            row[holder] = i;
-            //rowP[holder] = i;
-            r = row_val[i];
-        }
-    }
-    //row[holder+1] = nonzeros-1;
-
-    double* W =  (double*)malloc(sizeof(double)*num_rows*s_factor);
-    double* H =  (double*)malloc(sizeof(double)*num_cols*s_factor);
-    double* P =  (double*)malloc(sizeof(double)*nonzeros);
-    //double* ParallelP =  (double*)malloc(sizeof(double)*nonzeros);
+    W =  (double*)malloc(sizeof(double)*(num_rows*s_factor+s_factor));
+    H =  (double*)malloc(sizeof(double)*(num_cols*s_factor+s_factor));
+    P =  (double*)malloc(sizeof(double)*(nonzeros+1));
+    //ParallelP =  (double*)malloc(sizeof(double)*(nonzeros+1));
 
     initialize(W,num_rows,s_factor);
     initialize(H,num_cols,s_factor);
 
-    // while(idx<nonzeros){
-    //     //row_holder[holder]=r;
-    //     while(row_val[idx]==r && idx < nonzeros){
-    //         idx++;             
-    //     }
-    //     // tot += nnz_row[r];
-    //     holder++;
-    //     row[holder]=idx;
-    //     // cout << "rows " << r <<" "<< row_ptr[holder] << endl;
-    //     r = row_val[idx];
-    // }
-    // row[holder+1]=idx;
 
 
    for(k=0; k < num_runs; k++){
 
       gettimeofday(&start,NULL);
 
-      sddmm_CPU_CSR(row,col_val,nnz_val,W,H,P,num_rows,s_factor);
+      sddmm_CPU_CSR(row,col_val,nnz_val,W,H,P,num_rows,s_factor,nonzeros);
 
-      gettimeofday(&end, NULL);
+       gettimeofday(&end, NULL);
 
       seconds = (end.tv_sec + (double)end.tv_usec/1000000) - (start.tv_sec + (double)start.tv_usec/1000000); 
 
       total_time+= seconds;
 
-    //   gettimeofday(&start,NULL);
+     //   //  Parallel Run
+    //  gettimeofday(&start,NULL);
 
-    //     //Parallel Run
-    //   Par_sddmm_CPU_CSR(rowP,col_val,nnz_val,W,H,ParallelP,num_rows,s_factor);
+    //   Par_sddmm_CPU_CSR(rowP,col_val,nnz_val,W,H,ParallelP,num_rows,s_factor,nonzeros);
 
     //   gettimeofday(&end, NULL);
 
@@ -221,15 +260,16 @@ int main(int argc, char *argv[]) {
 
    }
 
-//    int failed = 0;
-//     for (int i = 0; i < nnzCnt; ++i) {
-//       if(P[i]-ParallelP[i] > 10e-4) failed=1;
-//     }
+    // failed = 0;
+    // for (int i = 0; i < nonzeros; ++i) {
+    //     //printf("P[%d]=%f, ParP[%d]=%f\n",i ,P[i], i ,ParallelP[i]);
+    //   if(P[i]-ParallelP[i] > 10e-4) failed=1;
+    // }
 
-//     if(failed == 1){
-//       printf("Verification failed!!!");
-//       exit(0);
-//     }
+    // if(failed == 1){
+    //   printf("Verification failed!!!");
+    //   exit(0);
+    // }
 
    printf("Input File Read successfully\n");
    
@@ -245,42 +285,3 @@ int main(int argc, char *argv[]) {
    return 0;
 }
 
-
-
-void sddmm_CPU_CSR(int * row_ptr, int *col_ind, double * val, double* W,
-                     double* H, double* p,int n_rows ,int k){
-       // reduction(+:rmse)
-    int r, ind,t;
-    double sm;
-    //#pragma omp parallel for private(sm,r,ind,t)
-    for (r = 0; r < n_rows; ++r){
-        for (ind = row_ptr[r]; ind < row_ptr[r+1]; ++ind){
-            sm=0;
-            for (t = 0; t < k; ++t){
-                sm += W[r * k + t] * H[col_ind[ind] * k + t];
-               
-            }
-            p[ind] = sm * val[ind];     //Scaling of non-zero elements of the sparse matrix
-           
-        }                
-    } 
-}
-
-void Par_sddmm_CPU_CSR(int * row_ptr, int *col_ind, double * val, double* W,
-                     double* H, double* p,int n_rows ,int k){
-       // reduction(+:rmse)
-    int r, ind,t;
-    double sm;
-    #pragma omp parallel for private(sm,r,ind,t)
-    for (r = 0; r < n_rows; ++r){
-        for (ind = row_ptr[r]; ind < row_ptr[r+1]; ++ind){
-            sm=0;
-            for (t = 0; t < k; ++t){
-                sm += W[r * k + t] * H[col_ind[ind] * k + t];
-               
-            }
-            p[ind] = sm * val[ind];     //Scaling of non-zero elements of the sparse matrix
-           
-        }                
-    } 
-}

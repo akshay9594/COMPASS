@@ -61,7 +61,3 @@ void ic0_csr_parInner(int n, double *val, int * colPtr, int *rowIdx)
 
 }
 
-
-  //Automatic dependence testing condition:
- // if(colPtr[i+1]-1 < colPtr[rowIdx[colPtr[i] + 1]] || 
-      //       colPtr[rowIdx[colPtr[i]]+1]-1 < colPtr[i] + 1)
