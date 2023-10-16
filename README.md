@@ -36,7 +36,7 @@ cd COMPASS
 
 # Compiling and Running the benchmarks
 
-   1. There are 2 main directories - "serial" and "parallel
+   1. There are 2 main directories - "serial" and "parallel"
        which contain the serial and parallel versions of the codes. The
        process of compiling and running the codes is the same for both
        versions.
