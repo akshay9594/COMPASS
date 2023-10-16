@@ -119,9 +119,9 @@ void test_Matvec()
 
   double time_array[500] = {0.0};
 
-  nx = 100;  /* size per proc nx*ny*nz */
-  ny = 100;
-  nz = 100;
+  nx = 60;  /* size per proc nx*ny*nz */
+  ny = 60;
+  nz = 60;
 
   values = hypre_CTAlloc(double, 4);
   values[0] = 6; 

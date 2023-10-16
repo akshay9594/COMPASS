@@ -1,6 +1,4 @@
-/* 
- Subscripted subscript example from the Algebraic Multigrid kernel (Amgmk)
-*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +14,6 @@
 void sddmm_CPU_CSR(int* col_ptr, int* col_ind, double* nnz_val, double* W,
                      double* H, double* p,int n_rows ,int k, int nonzeros);
 
-// void Par_sddmm_CPU_CSR(int* par_row_ptr, int* col_ind, double* nnz_val, double* W,
-//                      double* H, double* p,int n_rows ,int k, int nonzeros);
 
 int* row_val; 
 int* col_val; 
@@ -67,7 +63,7 @@ int convertStrtoArr(char* str)
 
 void sddmm_CPU_CSR(int* col_ptr, int* row_ind, double* nnz_val, double* W,
                      double* H, double* p,int n_cols ,int k, int nonzeros){
-       // reduction(+:rmse)
+
     int i,r, ind,t,holder;
     double sm;
 
@@ -77,12 +73,11 @@ void sddmm_CPU_CSR(int* col_ptr, int* row_ind, double* nnz_val, double* W,
       for(i =0; i < nonzeros; i++){
         if(col_val[i] != r){
             col_ptr[holder++] = i;
-           // rowP[holder] = i;
+     
             r = col_val[i];
         }
     }
 
-    //printf("colptr[%d]=%d\n", 1, col_ptr[1]);
     col_ptr[holder] = nonzeros;
 
     //#pragma omp parallel for private(sm,r,ind,t)
@@ -99,38 +94,6 @@ void sddmm_CPU_CSR(int* col_ptr, int* row_ind, double* nnz_val, double* W,
     } 
 }
 
-// void Par_sddmm_CPU_CSR(int* par_row_ptr, int* col_ind, double* nnz_val, double* W,
-//                      double* H, double* p,int n_rows ,int k, int nonzeros){
-//        // reduction(+:rmse)
-//     int i,r, ind,t,holder;
-//     double sm;
-
-//      holder =0;
-//     par_row_ptr[0]=0;
-//      r = row_val[0];
-//       for(i =0; i < nonzeros; i++){
-//         if(row_val[i] != r){
-//             par_row_ptr[holder++] = i;
-//            // rowP[holder] = i;
-//             r = row_val[i];
-//         }
-//     }
-    
-//     par_row_ptr[holder] = nonzeros;
-
-//     #pragma omp parallel for private(sm,r,ind,t)
-//     for (r = 0; r < n_rows; ++r){
-//         for (ind = par_row_ptr[r]; ind < par_row_ptr[r+1]; ++ind){
-//             sm=0;
-//             for (t = 0; t < k; ++t){
-//                 sm += W[r * k + t] * H[col_ind[ind] * k + t];
-               
-//             }
-//             p[ind] = sm * nnz_val[ind];     //Scaling of non-zero elements of the sparse matrix
-           
-//         }                
-//     } 
-// }
 
 int main(int argc, char *argv[]){
 
@@ -244,29 +207,8 @@ int main(int argc, char *argv[]){
 
       total_time+= seconds;
 
-     // gettimeofday(&start,NULL);
-
-    //   //  Parallel Run
-    //   Par_sddmm_CPU_CSR(rowP,col_val,nnz_val,W,H,ParallelP,num_rows,s_factor,nonzeros);
-
-    //   gettimeofday(&end, NULL);
-
-    //   seconds = (end.tv_sec + (double)end.tv_usec/1000000) - (start.tv_sec + (double)start.tv_usec/1000000); 
-
-    //   total_timeP+= seconds;
-
    }
 
-    // failed = 0;
-    // for (i = 0; i < num_rows; ++i) {
-    //     printf("P[%d]=%f,\n",i ,P[i]);
-    //   //if(P[i]-ParallelP[i] > 10e-4) failed=1;
-    // }
-
-    // if(failed == 1){
-    //   printf("Verification failed!!!");
-    //   exit(0);
-    // }
 
    printf("Input File Read successfully\n");
    
