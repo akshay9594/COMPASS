@@ -161,7 +161,7 @@ SUITESPARSE_VERSION = 5.4.0
     # performance.  This script can also detect if the Intel MKL BLAS is
     # installed.
 
-    LAPACK ?= ~/COMPASS/SuiteSparse/lapack/liblapack.a
+    LAPACK ?= ~/COMPASS/serial/SuiteSparse/lapack/liblapack.a
 
     ifndef BLAS
         ifdef MKLROOT
@@ -177,7 +177,7 @@ SUITESPARSE_VERSION = 5.4.0
             LAPACK = 
         else
             # use the OpenBLAS at http://www.openblas.net
-            BLAS = ~/COMPASS/SuiteSparse/OpenBLAS/libopenblas.a -lgfortran
+            BLAS = ~/COMPASS/serial/SuiteSparse/OpenBLAS/libopenblas.a -lgfortran
         endif
     endif
 

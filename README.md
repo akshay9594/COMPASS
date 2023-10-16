@@ -36,7 +36,11 @@ cd COMPASS
 
 # Compiling and Running the benchmarks
 
-   1. Compiling amgmk, IncompleteCholesky and SDDMM
+   1. There are 2 main directories - "serial" and "parallel
+       which contain the serial and parallel versions of the codes. The
+       process of compiling and running the codes is the same for both
+       versions.
+   2. Compiling amgmk, IncompleteCholesky and SDDMM
       - Navigate to the source of these benchmarks and find the Makefile
       - Use the "make" command to run the Makefile and generate the 
         executable.
