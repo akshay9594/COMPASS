@@ -334,7 +334,7 @@ static void do_refine(logical *ifmortar, int *irefine)
   int cb, cbctemp[6];
 
   // initialize
-  #pragma omp parallel for default(shared) private(miel)
+  //#pragma omp parallel for default(shared) private(miel)
   for (miel = 0; miel < nelt; miel++) {
     mt_to_id_old[miel] = mt_to_id[miel];
     mt_to_id[miel] = -1;
